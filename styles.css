@@ -117,3 +117,73 @@
     line-height: 1.5;
   }
 
+/* Fun Gallery Styles */
+/* Container principal: Flexbox para alinhar em linha */
+#fun-gallery-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  overflow-x: auto;
+  cursor: grab;
+  
+  /* Esconde scrollbar mas mantém funcionalidade */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  
+  /* Previne seleção de texto ao arrastar */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#fun-gallery-container::-webkit-scrollbar {
+  display: none;
+}
+
+#fun-gallery-container:active {
+  cursor: grabbing;
+}
+
+.fun-gallery-item {
+  flex: 0 0 auto; /* Impede encolhimento */
+  width: 280px;
+  height: 380px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  background: #fff;
+  border: 3px solid #fff; /* Borda branca estilo foto */
+  
+  /* Estilos Dinâmicos */
+  transform: rotate(var(--rotation));
+  animation: float 6s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+.fun-gallery-item:hover {
+  transform: scale(1.1) rotate(0deg) translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  animation-play-state: paused; /* Pausa a flutuação ao passar o mouse */
+}
+
+@keyframes float {
+  0%, 100% { transform: rotate(var(--rotation)) translateY(0); }
+  50% { transform: rotate(var(--rotation)) translateY(-8px); }
+}
+
+.fun-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none; /* Essencial para o arrastar funcionar bem */
+}
+
+@media (max-width: 640px) {
+  .fun-gallery-item {
+    width: 180px;
+    height: 260px;
+  }
+}

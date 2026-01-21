@@ -259,16 +259,19 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("Erro ao carregar tema (pode ser restrição de arquivo local):", e);
   }
 
-  // Stacked Gallery
-  initStackedGallery();
+  // Fun Gallery
+  initFunGallery();
 });
 
-// Interactive Stacked Gallery Logic
-function initStackedGallery() {
-    const galleryContainer = document.getElementById('stacked-gallery-container');
+// Interactive Fun Gallery Logic
+function initFunGallery() {
+    const galleryContainer = document.getElementById('fun-gallery-container');
     if (!galleryContainer) return;
 
-    const images = [
+    // Limpa container
+    galleryContainer.innerHTML = '';
+
+    const baseImages = [
         'src/imagens/WhatsApp Image 2026-01-20 at 17.25.43 (1).jpeg',
         'src/imagens/WhatsApp Image 2026-01-20 at 17.25.43 (2).jpeg',
         'src/imagens/WhatsApp Image 2026-01-20 at 17.25.43.jpeg',
@@ -290,99 +293,65 @@ function initStackedGallery() {
         'src/imagens/WhatsApp Image 2026-01-20 at 17.25.47 (4).jpeg',
         'src/imagens/WhatsApp Image 2026-01-20 at 17.25.47.jpeg',
         'src/imagens/WhatsApp Image 2026-01-20 at 17.25.48.jpeg',
-    ].map(path => {
-        // Normaliza barras invertidas para barras normais e codifica espaços/caracteres
+    ];
+
+    // Duplica as imagens para a lista ficar longa e divertida de rolar
+    const images = [...baseImages, ...baseImages].map(path => {
         const normalized = path.replace(/\\/g, '/');
         return encodeURI(normalized);
     });
 
-    // Create and style cards
     images.forEach((src, index) => {
-        const card = document.createElement('div');
-        const transform = `rotate(${(Math.random() - 0.5) * 8}deg) translate(${(Math.random() - 0.5) * 10}px, ${(Math.random() - 0.5) * 10}px)`;
+        const item = document.createElement('div');
+        item.className = 'fun-gallery-item';
         
-        card.className = 'absolute inset-0 w-full h-full p-2 sm:p-4 transition-all duration-300 ease-out';
-        card.style.zIndex = index;
-        card.style.transform = transform;
-        card.dataset.originalTransform = transform;
-        card.innerHTML = `<img src="${src}" alt="Foto da galeria ${index + 1}" class="w-full h-full object-cover rounded-2xl shadow-2xl pointer-events-none bg-gray-200">`;
+        // Gera rotação aleatória entre -6 e 6 graus
+        const rotation = Math.random() * 12 - 6;
+        // Gera delay aleatório para que as fotos não flutuem juntas
+        const delay = Math.random() * -5;
         
-        galleryContainer.appendChild(card);
+        item.style.setProperty('--rotation', `${rotation}deg`);
+        item.style.setProperty('--delay', `${delay}s`);
+        
+        item.innerHTML = `<img src="${src}" alt="Foto da galeria ${index + 1}" loading="lazy" draggable="false">`;
+        galleryContainer.appendChild(item);
     });
 
-    let cards = Array.from(galleryContainer.children);
-    let activeCard = cards[cards.length - 1];
-    let isDragging = false;
-    let startX = 0;
-    let currentX = 0;
+    // --- Lógica de Arrastar (Drag to Scroll) Robusta ---
+    let isDown = false;
+    let startX;
+    let scrollLeft;
 
-    function updateActiveCard() {
-        cards = Array.from(galleryContainer.children);
-        activeCard = cards[cards.length - 1];
-    }
+    galleryContainer.addEventListener('mousedown', (e) => {
+        isDown = true;
+        galleryContainer.classList.add('active');
+        startX = e.pageX - galleryContainer.offsetLeft;
+        scrollLeft = galleryContainer.scrollLeft;
+    });
 
-    function startDrag(e) {
-        if (!activeCard || isDragging) return;
-        isDragging = true;
-        startX = e.pageX || e.touches[0].pageX;
-        activeCard.style.transition = 'transform 0s'; // No transition while dragging
-    }
+    galleryContainer.addEventListener('mouseleave', () => {
+        isDown = false;
+        galleryContainer.classList.remove('active');
+    });
 
-    function drag(e) {
-        if (!isDragging || !activeCard) return;
+    galleryContainer.addEventListener('mouseup', () => {
+        isDown = false;
+        galleryContainer.classList.remove('active');
+    });
+
+    galleryContainer.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
         e.preventDefault();
-        currentX = (e.pageX || e.touches[0].pageX) - startX;
-        const rotation = currentX / 20;
-        activeCard.style.transform = `translateX(${currentX}px) rotate(${rotation}deg)`;
-    }
+        const x = e.pageX - galleryContainer.offsetLeft;
+        const walk = (x - startX) * 2; // Multiplicador de velocidade
+        galleryContainer.scrollLeft = scrollLeft - walk;
+    });
 
-    function endDrag() {
-        if (!isDragging || !activeCard) return;
-        isDragging = false;
-        activeCard.style.transition = 'transform 0.4s ease-out';
-
-        const threshold = window.innerWidth / 5;
-
-        if (Math.abs(currentX) > threshold) {
-            // Swipe out
-            const direction = currentX > 0 ? 1 : -1;
-            activeCard.style.transform = `translateX(${direction * (window.innerWidth / 2)}px) rotate(${direction * 15}deg)`;
-            
-            const swipedCard = activeCard;
-            
-            swipedCard.addEventListener('transitionend', function onSwipeEnd() {
-                swipedCard.removeEventListener('transitionend', onSwipeEnd);
-                
-                // Move card to the beginning of the container (bottom of the stack)
-                galleryContainer.prepend(swipedCard);
-                
-                // Reset its style and transition
-                swipedCard.style.transition = 'none';
-                swipedCard.style.transform = swipedCard.dataset.originalTransform;
-
-                // Update z-indexes for all cards
-                const allCards = galleryContainer.querySelectorAll('.absolute');
-                allCards.forEach((card, index) => {
-                    card.style.zIndex = index;
-                });
-                
-                // Update active card
-                updateActiveCard();
-
-            }, { once: true });
-
-        } else {
-            // Snap back
-            activeCard.style.transform = activeCard.dataset.originalTransform;
+    // Permite scroll horizontal com a roda do mouse (Desktop)
+    galleryContainer.addEventListener('wheel', (evt) => {
+        if (evt.deltaY !== 0) {
+            evt.preventDefault();
+            galleryContainer.scrollLeft += evt.deltaY;
         }
-        currentX = 0;
-    }
-
-    galleryContainer.addEventListener('mousedown', startDrag);
-    galleryContainer.addEventListener('touchstart', startDrag, { passive: true });
-    window.addEventListener('mousemove', drag);
-    window.addEventListener('touchmove', drag);
-    window.addEventListener('mouseup', endDrag);
-    window.addEventListener('touchend', endDrag);
-    window.addEventListener('mouseleave', () => { if(isDragging) endDrag(); });
+    });
 }
