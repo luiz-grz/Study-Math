@@ -119,6 +119,11 @@ function addChild() {
       <label class="text-gray-700 font-bold text-sm">Ano/Série *</label>
       <select name="childGrade[]" required class="mt-2 w-full h-12 rounded-xl border-2 px-4 text-base">
         <option value="">Selecione o ano</option>
+        <option value="1º ano">1º ano do Ensino Fundamental</option>
+        <option value="2º ano">2º ano do Ensino Fundamental</option>
+        <option value="3º ano">3º ano do Ensino Fundamental</option>
+        <option value="4º ano">4º ano do Ensino Fundamental</option>
+        <option value="5º ano">5º ano do Ensino Fundamental</option>
         <option value="6º ano">6º ano do Ensino Fundamental</option>
         <option value="7º ano">7º ano do Ensino Fundamental</option>
         <option value="8º ano">8º ano do Ensino Fundamental</option>
@@ -136,7 +141,7 @@ function addChild() {
         <label class="flex items-center"><input type="checkbox" name="childSubjects${childCounter}[]" value="Ciências" class="mr-2"><span class="text-sm">Ciências</span></label>
         <label class="flex items-center"><input type="checkbox" name="childSubjects${childCounter}[]" value="História" class="mr-2"><span class="text-sm">História</span></label>
         <label class="flex items-center"><input type="checkbox" name="childSubjects${childCounter}[]" value="Geografia" class="mr-2"><span class="text-sm">Geografia</span></label>
-        <label class="flex items-center"><input type="checkbox" name="childSubjects${childCounter}[]" value="Inglês" class="mr-2"><span class="text-sm">Inglês</span></label>
+        <label class="flex items-center"><input type="checkbox" name="childSubjects${childCounter}[]" value="Mentoria Educacional" class="mr-2"><span class="text-sm">Mentoria Educacional</span></label>
       </div>
     </div>
   `;
